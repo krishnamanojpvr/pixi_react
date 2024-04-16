@@ -1,0 +1,4 @@
+{
+    "animals" : ["/animals/elephant.png", "/animals/giraffe.png", "/animals/rhino.png", "/animals/zebra.png"],
+    "cars" : ["/cars/audi.png", "/cars/bmw.png", "/cars/mercedes.png", "/cars/vw.png"]
+}
