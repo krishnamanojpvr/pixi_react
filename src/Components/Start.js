@@ -7,15 +7,17 @@ export default function Start() {
     localStorage.setItem("choice", document.getElementById("shadowSelect").value);
     navigate("/shadowmatching");
   }
+  function handleShape() {
+    navigate("/shapematching");
+  }
   return (
     <div className="mt-5">
       <select id="shadowSelect" onChange={handleSelectShadow} className="btn btn-primary me-2">
-        <option defaultValue className="btn btn-dark">Shadow Matching Game</option>
+        <option defaultValue className="btn btn-dark">Shadow Matching (Drag and Drop)</option>
         <option value="animals"className="btn btn-dark">Animals</option>
         <option value="cars"className="btn btn-dark">Cars</option>
       </select>
-      <button className="btn btn-primary me-2">Game 2</button>
-      <button className="btn btn-primary me-2">Game 3</button>
+      <button className="btn btn-primary me-2" onClick={handleShape}>Shape Matching (Click)</button>
     </div>
   );
 }
