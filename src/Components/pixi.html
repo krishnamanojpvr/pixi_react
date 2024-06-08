@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+
+  <body>
+    <script src="https://pixijs.download/v8.1.0/pixi.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script>
+      // import { Application, Assets, Sprite, SCALE_MODES } from 'pixi.js';d
+
+      function randomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      (async () => {
+        const app = new PIXI.Application();
+        await app.init({ background: "#1099bb", resizeTo: window });
+
+        document.body.appendChild(app.canvas);
+
+        // const imgs = ["elephant", "giraffe", "rhino", "zebra"];
+        const imgs = ["audi", "bmw", "mercedes", "vw"];
+
+        const textures = await Promise.all(imgs.map((img) => PIXI.Assets.load(img + ".png")));
+        textures.forEach((texture) => (texture.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR));
+
+        for (let i = 0; i < 8; i++) {
+          let x;
+          switch (i % 4) {
+            case 0:
+              x = app.screen.width * 0.75;
+              break;
+            case 1:
+              x = app.screen.width * 0.15;
+              break;
+            case 2:
+              x = app.screen.width * 0.85;
+              break;
+            case 3:
+              x = app.screen.width * 0.25;
+              break;
+          }
+          createObj(x, ((app.screen.height / 4) * (i % 2 ? i : i + 1)) / 2, i);
+        }
+
+        function createObj(x, y, id) {
+          const texture = textures[Math.floor(id / 2)];
+          const bunny = new PIXI.Sprite(texture);
+
+          let line;
+          if (id % 2 == 0) {
+            bunny.tint = 0x222222;
+          }
+
+          bunny.eventMode = "static";
+
+          bunny.anchor.set(0.5);
+          if (id % 2 != 0) {
+            bunny.cursor = "pointer";
+            bunny.on("pointerdown", onDragStart, bunny);
+          }
+
+          bunny.scale.set(id % 2 ? 170 / texture.height : 180/ texture.height);
+
+          bunny.x = x - bunny.width / 8;
+          bunny.y = y + (id < 4 ? 1 : -1) * (bunny.height / (Math.abs(4-id)>2?20:19));
+          bunny.id = id;
+          app.stage.addChild(bunny);
+        }
+
+        let dragTarget = null;
+
+        app.stage.eventMode = "static";
+        app.stage.hitArea = app.screen;
+        app.stage.on("pointerup", onDragEnd);
+        app.stage.on("pointerupoutside", onDragEnd);
+
+        function onDragMove(event) {
+          if (dragTarget) {
+            if (dragTarget.id % 2) {
+              let shadow = app.stage.children[dragTarget.id - 1];
+              if (
+                shadow.position.x < dragTarget.position.x &&
+                dragTarget.position.x + dragTarget.width < shadow.position.x + shadow.width &&
+                shadow.position.y < dragTarget.position.y &&
+                dragTarget.position.y + dragTarget.height < shadow.position.y + shadow.height
+              ) {
+                dragTarget.tint = 0x88ff88;
+                onDragEnd();
+                confetti({
+                  particleCount: 600,
+                  spread: 100,
+                  decay: 0.95,
+                  scalar: 1.5,
+                  ticks: 150,
+                  origin: { y: 0.9 }
+                });
+              } else {
+                // dragTarget.tint = null;
+                dragTarget.parent.toLocal(event.global, null, dragTarget.position);
+              }
+            }
+          }
+        }
+        function onDragStart() {
+          if (this.tint == 0x88ff88) return;
+
+          this.alpha = 0.5;
+          dragTarget = this;
+          app.stage.on("pointermove", onDragMove);
+        }
+
+        function onDragEnd() {
+          if (dragTarget) {
+            app.stage.off("pointermove", onDragMove);
+            dragTarget.alpha = 1;
+            dragTarget = null;
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
